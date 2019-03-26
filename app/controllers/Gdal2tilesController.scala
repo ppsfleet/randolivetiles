@@ -9,15 +9,15 @@ import play.api.mvc._
 
 
 @Singleton
-class UTMController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
+class Gdal2tilesController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
 
-  def findUTM: Action[AnyContent] = Action { implicit request =>
+  def tiling: Action[AnyContent] = Action { implicit request =>
     request.body.asJson.map { json =>
-        (json \ "geolocs").asOpt[List[String]].map { geolocs =>
-            val result = Map("UTM" -> "UTMParameters from geolocs")
+        (json \ "img").asOpt[String].map { img =>
+            val result = Map("tilesURL" -> List("url tile1", "url tile2", "url tile3"))
             Ok(Json.toJson(result))
         }.getOrElse {
-        BadRequest("Missing parameter text")
+        BadRequest("Missing parameter img")
         }
     }.getOrElse {
         BadRequest("Expecting Json data")
