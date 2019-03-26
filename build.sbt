@@ -1,22 +1,17 @@
-lazy val akkaHttpVersion = "10.1.8"
-lazy val akkaVersion    = "2.5.21"
+name := """randolivetiles"""
+organization := "ppsfleet"
 
-lazy val root = (project in file(".")).
-  settings(
-    inThisBuild(List(
-      organization    := "ppsfleet",
-      scalaVersion    := "2.12.7"
-    )),
-    name := "randolivetiles",
-    libraryDependencies ++= Seq(
-      "com.typesafe.akka" %% "akka-http"            % akkaHttpVersion,
-      "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion,
-      "com.typesafe.akka" %% "akka-http-xml"        % akkaHttpVersion,
-      "com.typesafe.akka" %% "akka-stream"          % akkaVersion,
+version := "1.0-SNAPSHOT"
 
-      "com.typesafe.akka" %% "akka-http-testkit"    % akkaHttpVersion % Test,
-      "com.typesafe.akka" %% "akka-testkit"         % akkaVersion     % Test,
-      "com.typesafe.akka" %% "akka-stream-testkit"  % akkaVersion     % Test,
-      "org.scalatest"     %% "scalatest"            % "3.0.5"         % Test
-    )
-  )
+lazy val root = (project in file(".")).enablePlugins(PlayScala)
+
+scalaVersion := "2.12.8"
+
+libraryDependencies += guice
+libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "4.0.1" % Test
+
+// Adds additional packages into Twirl
+//TwirlKeys.templateImports += "ppsfleet.controllers._"
+
+// Adds additional packages into conf/routes
+// play.sbt.routes.RoutesKeys.routesImport += "ppsfleet.binders._"

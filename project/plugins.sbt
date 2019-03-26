@@ -1,3 +1,2 @@
-addSbtPlugin("org.scalariform" % "sbt-scalariform" % "1.8.2")
-
-addSbtPlugin("io.spray" % "sbt-revolver" % "0.9.1")
+addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.7.0")
+addSbtPlugin("org.foundweekends.giter8" % "sbt-giter8-scaffold" % "0.11.0")
