@@ -7,14 +7,14 @@
 GET     /                           controllers.HomeController.index
 GET     /rando                      controllers.RandoController.index
 GET     /rando/:name                controllers.RandoController.search(name: String)
-POST    /annotateplaces             controllers.AnnotateController.annotate
-POST    /locateentity               controllers.EntityController.locate
+POST    /textannotation             controllers.AnnotateController.annotate
+POST    /locateentities             controllers.EntityController.locate
 POST    /mainUTM                    controllers.UTMController.findUTM
-#GET     /satelliteimage/:utm        controllers.HomeController.index
+GET     /satelliteimage/:utm        controllers.SatelliteController.search(utm: String, dateBegin: Option[String], dateEnd: Option[String])
 POST    /gdal2tiles                 controllers.Gdal2tilesController.tiling
 POST    /HDFSsave                   controllers.HDFSController.save
-#POST    /indexelastic               controllers.HomeController.index
-#GET     /search                     controllers.HomeController.index
+POST    /indexelastic               controllers.ElasticSearchController.search
+GET     /search                     controllers.SearchBoxController.search(pos1: Option[String], pos2: Option[String])
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
