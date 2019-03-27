@@ -20,8 +20,21 @@ class UTMController @Inject()(cc: ControllerComponents) extends AbstractControll
   def findUTM: Action[AnyContent] = Action { implicit request =>
     request.body.asJson.map { json =>
         (json \ "geolocs").asOpt[List[String]].map { geolocs =>
-            val result = Map("UTM" -> computeUtmFromcoordonnates(43.3017,-0.3686))
-            Ok(Json.toJson(result))
+            
+              val l: List[String] = geolocs.map { coordonates =>
+                var coordonatesSplit = coordonates.split("\\W+")
+                computeUtmFromcoordonnates(coordonatesSplit(0).toDouble,coordonatesSplit(1).toDouble)
+              }
+              val map: Map[String, Int] = l.foldLeft(Map.empty[String, Int])((acc, elt) =>
+                acc.get(elt)
+                  .map(count => acc + ((elt, count + 1)))
+                  .getOrElse(acc + ((elt, 1))))
+              val maybeElt: String = map
+                .maxBy {
+                  case (_, count) => count
+                }
+                ._1
+              Ok(Json.toJson(maybeElt))
         }.getOrElse {
         BadRequest("Missing parameter text")
         }
