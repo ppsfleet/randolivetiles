@@ -43,8 +43,18 @@ class SatelliteController @Inject()(config: Configuration, cc: ControllerCompone
 
     val futureResponse: Future[WSResponse] = complexRequest.get()
     futureResponse.map { response => 
-      val urls = (response.json\\"download").map( titi => (titi\"url").as[String])
-      val result = Map("box" -> Json.toJson(utm), "maps" -> Json.toJson(urls))
+      val urls = (response.json\"features").as[List[JsValue]].map( img => Json.toJson(Map(
+          "url" -> Json.toJson((img\"properties"\"services"\"download"\"url").as[String]), 
+          "projection" -> Json.toJson((if ((img\"properties"\"processingLevel")=="LEVEL2A") "WGS84" else "UTM")),
+          "level" -> Json.toJson((img\"properties"\"processingLevel").as[String]),
+          "date" -> Json.toJson((img\"properties"\"startDate").as[String]),
+          "box"-> Json.toJson((img\"geometry"\"coordinates").as[List[JsValue]]),
+        )
+      ))
+      
+
+      //val urls = (response.json\\"download").map( titi => (titi\"url").as[String])
+      val result = Map("img" -> Json.toJson(urls))
       Ok(Json.toJson(result))
     }
   }
