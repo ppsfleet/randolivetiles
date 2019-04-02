@@ -13,7 +13,7 @@ POST    /mainUTM                    controllers.UTMController.findUTM
 GET     /satelliteimage/:utm        controllers.SatelliteController.search(utm: String, dateBegin: Option[String], dateEnd: Option[String])
 POST    /gdal2tiles                 controllers.Gdal2tilesController.tiling
 POST    /HDFSsave                   controllers.HDFSController.save
-POST    /indexelastic               controllers.ElasticSearchController.search
+POST    /indexelastic               controllers.ElasticSearchController.index
 GET     /search                     controllers.SearchBoxController.search(pos1: Option[String], pos2: Option[String])
 
 # Map static resources from the /public folder to the /assets URL path
