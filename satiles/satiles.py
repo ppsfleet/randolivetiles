@@ -6,6 +6,7 @@ from gdal2tiles import generate_tiles
 import asyncio
 import aiohttp
 import asyncio
+import shutil
 import os
 import re
 
@@ -27,13 +28,14 @@ async def extract_img(filename):
     with ZipFile(filename + ".zip", 'r') as zfile:
         for member in zfile.infolist():
             if re.match(r'(.*)(TCI)(.)(?!(20m|30m))(.*)', member.filename):
+                filepath = os.path.join(filename, os.path.basename(member.filename))
                 member.filename = os.path.basename(member.filename)
                 zfile.extract(member)
                 yield member.filename
 
 
 def gen_tiles_wrapper(sat_img):
-    generate_tiles(sat_img, sat_img.split(".")[0], np_processes=8, zoom="6-11")
+    generate_tiles(sat_img, sat_img.split(".")[0], zoom="6-11")
 
 
 async def run_tile_generation(file_extractor):
@@ -46,11 +48,19 @@ async def run_tile_generation(file_extractor):
                 gen_tiles_wrapper,
                 sat_img,
             )
+        yield sat_img
 
 
 async def process_url(url, filename):
     await downloadfile(url, filename)
-    await run_tile_generation(extract_img(filename))
+    images = run_tile_generation(extract_img(filename))
+
+    async for sat_img in images:
+        if not os.path.exists(filename):
+            os.mkdir(filename)
+        shutil.move(sat_img, os.path.join(filename, sat_img))
+        sat_tiles_dir = sat_img.split(".")[0]
+        shutil.move(sat_tiles_dir, os.path.join(filename, sat_tiles_dir))
 
 
 async def sat_img_downloader(request):
@@ -68,7 +78,13 @@ async def sat_img_downloader(request):
     return response
 
 
+async def check_img_done(request):
+    final_folder_created = os.path.exists(request.query["img"])
+    return web.json_response(final_folder_created)
+
+
 app = web.Application()
-app.router.add_post('/', sat_img_downloader)
+app.add_routes([web.post('/', sat_img_downloader),
+                web.get('/check-img-status', check_img_done)])
 setup(app)
 web.run_app(app)
