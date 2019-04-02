@@ -14,7 +14,7 @@ GET     /satelliteimage/:utm        controllers.SatelliteController.search(utm: 
 POST    /gdal2tiles                 controllers.Gdal2tilesController.tiling
 POST    /HDFSsave                   controllers.HDFSController.save
 POST    /indexelastic               controllers.ElasticSearchController.index
-GET     /search                     controllers.SearchBoxController.search(pos1: Option[String], pos2: Option[String])
+GET     /search                     controllers.ElasticSearchController.search(box: String)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

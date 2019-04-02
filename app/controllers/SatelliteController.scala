@@ -49,7 +49,7 @@ class SatelliteController @Inject()(config: Configuration, cc: ControllerCompone
           "level" -> Json.toJson((img\"properties"\"processingLevel").get),
           "date" -> Json.toJson((img\"properties"\"startDate").get),
           "cloudCover" -> Json.toJson((img\"properties"\"cloudCover").get),
-          "box"-> Json.toJson((img\"geometry"\"coordinates").get),
+          "location"-> Json.toJson((img\"geometry").get),
         )
       ))
       
@@ -58,5 +58,16 @@ class SatelliteController @Inject()(config: Configuration, cc: ControllerCompone
       val result = Map("img" -> Json.toJson(urls))
       Ok(Json.toJson(result))
     }
+  }
+
+  def boundingBox(img: JsValue) = Array[Array[Double]] {
+    println((img\"geometry"\"coordinates"))
+    // val points = (img\"geometry"\"coordinates").as[Array[Array[Double]]]
+    // val trucGauches = points.map(_(0))
+    // val trucDroites = points.map(_(1))
+    // println(trucGauches)
+    // println(trucDroites)
+    // Array(Array(trucGauches.min,trucDroites.min),Array(trucGauches.max, trucDroites.max)) 
+    Array(1.2,1.3)
   }
 }

@@ -28,7 +28,15 @@ class ElasticSearchController @Inject()(cc: ControllerComponents, ec: ExecutionC
             }
             """)
         // create index
-        ws.url(url+"/satellite").put("").flatMap{res =>  
+        ws.url(url+"/satellite").put(Json.parse("""{
+            "mappings": {
+                "maps": {
+                    "properties": {
+                        "location": {"type": "geo_shape"}
+                    }
+                }
+            }
+        }""")).flatMap{res =>  
           // change settings 
           ws.url(url+"/satellite/_settings").put(dataSettings).flatMap{ res =>
             // insert data
@@ -41,5 +49,35 @@ class ElasticSearchController @Inject()(cc: ControllerComponents, ec: ExecutionC
     }.getOrElse {
         Future{BadRequest("Expecting Json data")}
     }    
+  }
+
+  def search(box: String) = Action.async { implicit request =>
+    val hd::tl = box.split(",").grouped(2).toList
+    val sw = hd.toList.map(_.toDouble)
+    val ne = tl.flatten.map(_.toDouble)
+    val nw = List(ne(0),sw(1))
+    val se = List(sw(0),ne(1))
+
+    val poly = Json.toJson(List(sw, nw, ne, se, sw))
+    val url = config.getString("ESURL").getOrElse("localhost")+":"+config.getInt("ESPort").getOrElse(9200)
+    val searchQuery = Json.parse(raw"""
+      {
+        "query": {
+          "geo_shape": {
+            "location": {
+              "shape": {
+                "type": "polygon",
+                "coordinates": [$poly]
+              }
+            }
+          }
+        }
+      }
+    """)
+    ws.url(url+"/satellite/_search?pretty").post(searchQuery).map{ res =>
+      Ok{res.body}
+    }
+    
+
   }
 }
