@@ -24,7 +24,7 @@ class UTMController @Inject()(cc: ControllerComponents) extends AbstractControll
           val trucGauches = coordonates.map(_(0))
           val trucDroites = coordonates.map(_(1))
           val res = trucDroites.min+","+trucGauches.min+","+trucDroites.max+","+trucGauches.max
-          Ok(res)
+          Ok(Json.toJson(res))
         }.getOrElse {
           BadRequest("Missing parameter text")
         }
