@@ -15,17 +15,27 @@ import scala.concurrent.duration._
 
 @Singleton
 class AnnotateController @Inject()(cc: ControllerComponents,ws: WSClient) (implicit ec:ExecutionContext) extends AbstractController(cc) {
+  
+  implicit class RichResult (result: Result) {
+    def enableCors =  result.withHeaders(
+      "Access-Control-Allow-Origin" -> "*"
+      , "Access-Control-Allow-Methods" -> "OPTIONS, GET, POST, PUT, DELETE, HEAD"   // OPTIONS for pre-flight
+      , "Access-Control-Allow-Headers" -> "Accept, Content-Type, Origin, X-Json, X-Prototype-Version, X-Requested-With" //, "X-My-NonStd-Option"
+      , "Access-Control-Allow-Credentials" -> "true"
+    )
+  }
+
   def annotate: Action[AnyContent] = Action.async { implicit request =>
     request.body.asJson.map { json =>
         (json \ "text").asOpt[String].map { text2annotate =>
             requestApi(text2annotate).map(res =>
-                Ok(Json.toJson( Json.parse(res.body) \\ "@URI" ))
+                Ok(Json.toJson( Json.parse(res.body) \\ "@URI" )).enableCors
             )
         }.getOrElse {
-            Future(BadRequest("Missing parameter text"))
+            Future(BadRequest("Missing parameter text").enableCors)
         }
     }.getOrElse {
-        Future(BadRequest("Expecting Json data"))
+        Future(BadRequest("Expecting Json data").enableCors)
     }
   }
 

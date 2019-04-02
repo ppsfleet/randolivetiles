@@ -16,10 +16,18 @@ import play.api.libs.json._
 @Singleton
 class RandoController @Inject()(cc: ControllerComponents,ws: WSClient) (implicit ec:ExecutionContext) extends AbstractController(cc) {
 
+  implicit class RichResult (result: Result) {
+    def enableCors =  result.withHeaders(
+      "Access-Control-Allow-Origin" -> "*"
+      , "Access-Control-Allow-Methods" -> "OPTIONS, GET, POST, PUT, DELETE, HEAD"   // OPTIONS for pre-flight
+      , "Access-Control-Allow-Headers" -> "Accept, Content-Type, Origin, X-Json, X-Prototype-Version, X-Requested-With" //, "X-My-NonStd-Option"
+      , "Access-Control-Allow-Credentials" -> "true"
+    )
+  }
 
   def index: Action[AnyContent] = Action { implicit request =>
     val result = Map("toto" -> "tata", "titi" -> "tutu")
-    val r = Ok(Json.toJson(result));
+    val r = Ok(Json.toJson(result)).enableCors;
     r
   }
 
@@ -37,7 +45,7 @@ class RandoController @Inject()(cc: ControllerComponents,ws: WSClient) (implicit
             contains(searchName)
           ).
           map(extractFieldFromJson(_,"description"))
-        ))
+        )).enableCors
     )
   }
 

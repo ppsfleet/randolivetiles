@@ -22,6 +22,15 @@ import java.util.Calendar
 
 @Singleton
 class SatelliteController @Inject()(config: Configuration, cc: ControllerComponents, ws: WSClient, ec: ExecutionContext) extends AbstractController(cc) {
+  
+  implicit class RichResult (result: Result) {
+    def enableCors =  result.withHeaders(
+      "Access-Control-Allow-Origin" -> "*"
+      , "Access-Control-Allow-Methods" -> "OPTIONS, GET, POST, PUT, DELETE, HEAD"   // OPTIONS for pre-flight
+      , "Access-Control-Allow-Headers" -> "Accept, Content-Type, Origin, X-Json, X-Prototype-Version, X-Requested-With" //, "X-My-NonStd-Option"
+      , "Access-Control-Allow-Credentials" -> "true"
+    )
+  }
 
   def search(utm: String, dateBegin: Option[String], dateEnd: Option[String]) = Action.async  { implicit request =>
   //?box=-1.17215,43.127307,1.939431,44.445408&startDate=2019-03-23T15:53:00Z&completionDate=2019-03-27T15:53:00Z
@@ -55,7 +64,7 @@ class SatelliteController @Inject()(config: Configuration, cc: ControllerCompone
 
       //val urls = (response.json\\"download").map( titi => (titi\"url").as[String])
       val result = Map("img" -> Json.toJson(urls))
-      Ok(Json.toJson(result))
+      Ok(Json.toJson(result)).enableCors
     }
   }
 }
