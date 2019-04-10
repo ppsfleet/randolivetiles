@@ -26,10 +26,13 @@ class RandoController @Inject()(cc: ControllerComponents,ws: WSClient) (implicit
   def search(searchName: String) = Action.async { implicit request =>
     //val searchName: String = "Les ailes franco-belges"
     val searchNameLower =  searchName.toLowerCase()
-    val searchNameSecondWord = searchNameLower.split("\\W+") :+ ""
+    val words:List[String] = searchNameLower.split("\\W+").toList
+
+    
+
      //field=elevationMin&value=29
      // val promiseOfString: Future[WSResponse] = 
-    requestApi(searchNameSecondWord(1)).map(res => 
+    requestApi(chooseWord(words)).map(res => 
       Ok(Json.toJson(
           extractJson(res.body).
           filter(
@@ -41,6 +44,15 @@ class RandoController @Inject()(cc: ControllerComponents,ws: WSClient) (implicit
     )
   }
 
+  def chooseWord(words:List[String]):String = words match {
+    case word :: rest => 
+      word match {
+        case "le" | "la" | "les" | "dans" | "de" | "des" | "depuis" | "a" | "et" | "par" | "-" | ":" | "km" | "alt" => chooseWord(rest)
+        case _ => word
+      }
+    case Nil => ""
+  }
+
   def requestApi(name:String) = {
     ws.url("https://choucas.blqn.fr/data/outing/search_fields").withQueryString("field" -> "name","value" -> name).get()
   }
@@ -49,7 +61,7 @@ class RandoController @Inject()(cc: ControllerComponents,ws: WSClient) (implicit
     val json: JsValue = Json.parse(body)
     json match {
       case JsArray(value) => value
-      case JsNull => Nil
+      case _ => Nil
     }
   }
 
@@ -58,9 +70,9 @@ class RandoController @Inject()(cc: ControllerComponents,ws: WSClient) (implicit
       case JsObject(data) => 
         data(field) match {
           case JsString(value) => value
-          case JsNull => ""
+          case _ => ""
         }
-      case JsNull => ""
+      case _ => ""
     }
   }
 }

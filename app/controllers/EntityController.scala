@@ -42,7 +42,7 @@ class EntityController @Inject()(cc: ControllerComponents,ws: WSClient) (implici
         (json \ "results" \\ "value").map( value => {
           value match {
             case JsString(str) => str
-            case JsNull => ""
+            case _ => ""
           }
         })
     }
