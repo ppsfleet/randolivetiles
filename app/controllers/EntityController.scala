@@ -35,7 +35,10 @@ class EntityController @Inject()(cc: ControllerComponents,ws: WSClient) (implici
 
   //renvoi les locations d'une place sous forme de futur[seq[location]]
   def getLocation(place:String) : Future[Seq[String]] = {
-    val query: String = "http://fr.dbpedia.org/sparql?default-graph-uri=&query=select+distinct+%3Fcoord+where+%7B+dbpedia-fr%3A"+place+"+georss%3Apoint+%3Fcoord+%7D+LIMIT+100&format=application%2Fsparql-results%2Bjson"
+    val toRemove = "[()éèà]'".toSet
+    print(place)
+    val safePlace = place.filterNot(toRemove)
+    val query: String = "http://fr.dbpedia.org/sparql?default-graph-uri=&query=select+distinct+%3Fcoord+where+%7B+dbpedia-fr%3A"+safePlace+"+georss%3Apoint+%3Fcoord+%7D+LIMIT+100&format=application%2Fsparql-results%2Bjson"
     val promiseOfString: Future[WSResponse] = ws.url(query).get()
     promiseOfString.map(res => {
         val json: JsValue = Json.parse(res.body)
